@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "localhost に対して Chrome を起動する",
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "name": "Flutter (Pixel 2 API 24)",
+            "program": "lib/main.dart",
+            "deviceId": "emulator-5554",
+            "request": "launch",
+            "type": "dart"
+        }
+    ]
+}
