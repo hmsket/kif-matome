@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:kif_matome/kif_listview.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -29,7 +31,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,27 +38,8 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('棋譜まとめ'),
       ),
       body: Container(
-        child: (
-          Row(
-            children: [
-              Container(
-                alignment: Alignment.topLeft,
-                width: 100,
-                child: Image.asset('images/board.png'),
-              ),
-              Column(
-                children: [
-                  Text('title', style: TextStyle(fontSize: 25),),
-                  Text('tournament'),
-                  Text('date'),
-                  Text('sente'),
-                  Text('gote'),
-                ],
-              )
-            ],
-          )
-        ),
-      ),
+        child: KifListview(),
+      )
     );
   }
 }
