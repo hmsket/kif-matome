@@ -33,13 +33,39 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('棋譜まとめ'),
+    return DefaultTabController(
+      initialIndex: 0, // 最初に表示するタブ
+      length: 8, // タブの数
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('棋譜まとめ'),
+          bottom: const TabBar(
+            isScrollable: true, // スクロールを有効化
+            tabs: <Widget>[
+              Tab(text: '角換わり腰掛け銀'),
+              Tab(text: 'サッカー'),
+              Tab(text: 'テニス'),
+              Tab(text: 'バスケ'),
+              Tab(text: '剣道'),
+              Tab(text: '柔道'),
+              Tab(text: '水泳'),
+              Tab(text: '卓球'),
+            ],
+          ),
+        ),
+        body: const TabBarView(
+          children: <Widget>[
+            KifListview(),
+            KifListview(),
+            KifListview(),
+            KifListview(),
+            KifListview(),
+            KifListview(),
+            KifListview(),
+            KifListview(),
+          ],
+        ),
       ),
-      body: Container(
-        child: KifListview(),
-      )
     );
   }
 }
