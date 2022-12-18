@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:kif_matome/shogi_board.dart';
+
 class KifListview extends StatelessWidget {
   const KifListview({super.key});
 
@@ -12,29 +14,35 @@ class KifListview extends StatelessWidget {
         ListView.builder(
           itemCount: kifs.length,
           itemBuilder: (context, index) {
-            return Column(
-              children: [
-                Row(
+            return GestureDetector(
+              onTap: (() {
+                Navigator.push(context, MaterialPageRoute(builder:(context) => ShogiBoard(),));
+              }),
+              child: 
+                Column(
                   children: [
-                    Container(
-                      alignment: Alignment.topLeft,
-                      width: 100,
-                      child: Image.asset('images/board.png'),
-                    ),
-                    Column(
+                    Row(
                       children: [
-                        Text('Title', style: TextStyle(fontSize: 25),),
-                        Text('Tournament'),
-                        Text('Date'),
-                        Text('Sente'),
-                        Text('Gote'),
+                        Container(
+                          alignment: Alignment.topLeft,
+                          width: 100,
+                          child: Image.asset('images/initialBoard.png'),
+                        ),
+                        Column(
+                          children: [
+                            Text('Title', style: TextStyle(fontSize: 25),),
+                            Text('Tournament'),
+                            Text('Date'),
+                            Text('Sente'),
+                            Text('Gote'),
+                          ],
+                        )
                       ],
-                    )
+                    ),
+                    Divider(height: 1,),
                   ],
-                ),
-                Divider(height: 1,),
-              ],
-            );
+                )
+              );
           },
         )
       ),

@@ -61,7 +61,37 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - images/initialBoard.png
     - images/board.png
+    - images/komadai.png
+    - images/koma/bfu.png
+    - images/koma/bya.png
+    - images/koma/bke.png
+    - images/koma/bgi.png
+    - images/koma/bki.png
+    - images/koma/bka.png
+    - images/koma/bhi.png
+    - images/koma/bgy.png
+    - images/koma/bto.png
+    - images/koma/bny.png
+    - images/koma/bnk.png
+    - images/koma/bng.png
+    - images/koma/bum.png
+    - images/koma/bry.png
+    - images/koma/wfu.png
+    - images/koma/wya.png
+    - images/koma/wke.png
+    - images/koma/wgi.png
+    - images/koma/wki.png
+    - images/koma/wka.png
+    - images/koma/whi.png
+    - images/koma/wgy.png
+    - images/koma/wto.png
+    - images/koma/wny.png
+    - images/koma/wnk.png
+    - images/koma/wng.png
+    - images/koma/wum.png
+    - images/koma/wry.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
