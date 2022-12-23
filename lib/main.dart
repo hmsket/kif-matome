@@ -30,7 +30,43 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+enum addMenu {addTab, addKif}
+enum sortMenu {sortTab, sortKif}
+
 class _MyHomePageState extends State<MyHomePage> {
+
+  void popupAddMenuSelected(addMenu selectedAddMenu) {
+    switch(selectedAddMenu) {
+      case addMenu.addTab:
+        showDialog(context: context, builder: (context){
+          return AlertDialog(
+            title: Text('タブを追加'),
+            content: TextField(decoration: InputDecoration(hintText: 'タブ名を入力してください'),),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: Text('キャンセル')),
+              TextButton(onPressed: () => Navigator.pop(context), child: Text('OK')),
+            ],
+          );
+        });
+        break;
+      case addMenu.addKif:
+        break;
+      default:
+        break;
+    }
+  }
+
+  void popupSortMenuSelected(sortMenu selectedSortMenu) {
+    switch(selectedSortMenu) {
+      case sortMenu.sortTab:
+        break;
+      case sortMenu.sortKif:
+        break;
+      default:
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -39,6 +75,37 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('棋譜まとめ'),
+          actions: <Widget>[
+            PopupMenuButton<addMenu>(
+              icon: Icon(Icons.add),
+              onSelected: popupAddMenuSelected,
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<addMenu>>[
+                const PopupMenuItem<addMenu>(
+                  value: addMenu.addTab,
+                  child: Text('タブを追加'),
+                ),
+                  const PopupMenuItem<addMenu>(
+                  value: addMenu.addKif,
+                  child: Text('棋譜を追加'),
+                ),
+              ],
+            ),
+            PopupMenuButton<sortMenu>(
+              icon: Icon(Icons.swap_vert),
+              onSelected: popupSortMenuSelected,
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<sortMenu>>[
+                const PopupMenuItem<sortMenu>(
+                  value: sortMenu.sortTab,
+                  child: Text('タブを並び替え'),
+                ),
+                  const PopupMenuItem<sortMenu>(
+                  value: sortMenu.sortKif,
+                  child: Text('棋譜を並び替え'),
+                ),
+              ],
+            ),
+          ],
+
           bottom: const TabBar(
             isScrollable: true, // スクロールを有効化
             tabs: <Widget>[
