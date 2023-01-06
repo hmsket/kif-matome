@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kif_matome/kif_listview.dart';
 import 'package:kif_matome/db_helper.dart';
 import 'package:kif_matome/my_tab.dart';
+import 'sort_tab_reorderable.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,6 +40,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   final _editController = TextEditingController();
   TabController? _tabController;
   List<String> _tabList = [];
+  MyReorderableListview? mrl;
 
   TabController _createNewTabController() => TabController(
     vsync: this,
@@ -140,7 +142,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     int tabOrder = await DBhelper.instance.getMaxTabOrder() + 1;
     MyTab tab = MyTab(tabId, tabName, tabOrder);
     DBhelper.instance.insertTab(tab);
-    Navigator.pop(context);
     
     getTabList().then((value) {
       setState(() {
@@ -148,17 +149,50 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         _tabController = _createNewTabController();
       });
     },);
+
+    Navigator.pop(context);
   }
 
   void popupSortMenuSelected(sortMenu selectedSortMenu) {
     switch(selectedSortMenu) {
       case sortMenu.sortTab:
+        // sort用のリストを別に生成
+        getTabList().then((value) {
+          _tabList = value;
+          _tabController = _createNewTabController();
+        },);
+
+        showDialog(context: context, builder: (context){
+          MyReorderableListview mrl = new MyReorderableListview(sortTabList: _tabList);
+          return AlertDialog(
+            title: Text('タブを並び替え'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: mrl,
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: Text('キャンセル')),
+              TextButton(onPressed: () => sortTab(mrl.getSortTabs()), child: Text('OK')),
+            ],
+          );
+        });
         break;
       case sortMenu.sortKif:
         break;
       default:
         break;
     }
+  }
+
+  Future<void> sortTab(List<String> sortTabList) async {
+    await DBhelper.instance.updateTab(sortTabList);
+    Navigator.pop(context);
+    getTabList().then((value) {
+      setState(() {
+        _tabList = value;
+        _tabController = _createNewTabController();
+      });
+    },);
   }
 
   Future<List<String>> getTabList() async {
@@ -174,5 +208,4 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Widget createTab(String tab){
     return KifListview();
   }
-  
 }

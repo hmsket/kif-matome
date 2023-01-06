@@ -123,16 +123,23 @@ class DBhelper {
     );
   }
 
-//   // データをupdateする
-//   Future update(Cats cats) async {
-//     final db = await database;
-//     return await db.update(
-//       'cats',
-//       cats.toJson(),
-//       where: '_id = ?',                   // idで指定されたデータを更新する
-//       whereArgs: [cats.id],
-//     );
-//   }
+  // updateする
+  Future updateTab(List<String> tabs) async {
+    final db = await database;
+    for(int i=0; i<tabs.length; i++) {
+      var values = <String, dynamic>{
+        'tab_order' : i,
+      };
+      await db.update(
+        'tabs', 
+        values,
+        where: 'tab_name=?',
+        whereArgs: [tabs[i]],
+        conflictAlgorithm: ConflictAlgorithm.fail,
+      );
+    }
+    return;
+  }
 
 // // データを削除する
 //   Future delete(int id) async {
