@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">KifMatome</string>
+    <string name="app_name">棋譜まとめ</string>
+    <string name="add">追加</string>
+    <string name="add_tab">タブを追加</string>
+    <string name="add_kif">棋譜を追加</string>
+    <string name="delete">削除</string>
+    <string name="delete_tab">タブを削除</string>
+    <string name="delete_kif">棋譜を削除</string>
+    <string name="sort">並び替え</string>
+    <string name="sort_tab">タブを並び替え</string>
+    <string name="sort_kif">棋譜を並び替え</string>
 </resources>
