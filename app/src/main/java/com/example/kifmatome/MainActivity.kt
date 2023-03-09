@@ -29,18 +29,10 @@ class MainActivity : AppCompatActivity() {
         helper = MyOpenHelper(applicationContext)
         db = helper.readableDatabase
 
-        tabList = readData()
-
-        // タブの移動をスワイプで行えるようにする
         viewPager = findViewById(R.id.pager)
-        pagerAdapter = PageAdapter(this, tabList)
-        viewPager.adapter = pagerAdapter
-
-        // タブを作成する
         tabLayout = findViewById(R.id.tab_layout)
-        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = tabList[position]
-        }.attach()
+
+        setTab()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -60,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    fun readData(): MutableList<String> {
+    fun readTabFromDB(): MutableList<String> {
         val tabList = mutableListOf<String>()
 
         val cursor = db.query(
@@ -114,14 +106,22 @@ class MainActivity : AppCompatActivity() {
                 db.insert("tab", null, values)
 
                 // 追加したタブもスワイプで移動できるようにする
-                tabList = readData()
-                pagerAdapter = PageAdapter(this, tabList)
-                viewPager.adapter = pagerAdapter
-                TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-                    tab.text = tabList[position]
-                }.attach()
+                setTab()
             })
             .setNegativeButton("キャンセル", null)
             .show()
+    }
+
+    fun setTab(){
+        tabList = readTabFromDB()
+
+        // タブの移動をスワイプで行えるようにする
+        pagerAdapter = PageAdapter(this, tabList)
+        viewPager.adapter = pagerAdapter
+
+        // タブを作成し，表示する
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.text = tabList[position]
+        }.attach()
     }
 }
