@@ -5,7 +5,9 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
+import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.ListView
 import androidx.appcompat.app.AlertDialog
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
@@ -44,7 +46,7 @@ class MainActivity : AppCompatActivity() {
          when (item.itemId) {
              R.id.add_tab -> addTab()
         //     R.id.add_kif ->
-        //     R.id.delete_tab ->
+             R.id.delete_tab -> deleteTab()
         //     R.id.delete_tab ->
         //     R.id.sort_tab ->
         //   R.id.sort_tab ->
@@ -110,6 +112,35 @@ class MainActivity : AppCompatActivity() {
             })
             .setNegativeButton("キャンセル", null)
             .show()
+    }
+
+    fun deleteTab(){
+        tabList = readTabFromDB()
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_expandable_list_item_1, tabList)
+        val tabListView = ListView(this)
+        tabListView.adapter = adapter
+        tabListView.setOnItemClickListener { adapterView, view, i, l ->
+            AlertDialog.Builder(this)
+                .setTitle("確認")
+                .setMessage("「" + tabList[i] + "」を削除します。\nこの操作は取り消せません。")
+                .setPositiveButton("OK", { dialog, which ->
+                    deleteTabFromDB(i)
+                })
+                .setNegativeButton("キャンセル", null)
+                .show()
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("タブを削除")
+            .setView(tabListView)
+            .setPositiveButton("閉じる", null)
+            .show()
+    }
+
+    fun deleteTabFromDB(position: Int){
+        val sql: String = "DELETE FROM tab ORDER BY tab_order ASC LIMIT 1 OFFSET " + position.toString() + ";"
+        db.execSQL(sql)
     }
 
     fun setTab(){
