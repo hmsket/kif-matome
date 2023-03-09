@@ -20,6 +20,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var helper: MyOpenHelper
     lateinit var db: SQLiteDatabase
 
+    lateinit var tabList: MutableList<String>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -27,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         helper = MyOpenHelper(applicationContext)
         db = helper.readableDatabase
 
-        val tabList: MutableList<String> = readData()
+        tabList = readData()
 
         // タブの移動をスワイプで行えるようにする
         viewPager = findViewById(R.id.pager)
@@ -110,6 +112,14 @@ class MainActivity : AppCompatActivity() {
                 values.put("tab_name", tabName)
                 values.put("tab_order", newTabOrder)
                 db.insert("tab", null, values)
+
+                // 追加したタブもスワイプで移動できるようにする
+                tabList = readData()
+                pagerAdapter = PageAdapter(this, tabList)
+                viewPager.adapter = pagerAdapter
+                TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+                    tab.text = tabList[position]
+                }.attach()
             })
             .setNegativeButton("キャンセル", null)
             .show()
