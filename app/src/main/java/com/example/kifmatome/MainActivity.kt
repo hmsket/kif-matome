@@ -1,15 +1,20 @@
 package com.example.kifmatome
 
 import android.content.ContentValues
+import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
 import android.widget.EditText
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import java.nio.charset.Charset
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
          when (item.itemId) {
              R.id.add_tab -> addTab()
-        //     R.id.add_kif ->
+             R.id.add_kif -> addKif()
         //     R.id.delete_tab ->
         //     R.id.delete_tab ->
         //     R.id.sort_tab ->
@@ -123,5 +128,35 @@ class MainActivity : AppCompatActivity() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = tabList[position]
         }.attach()
+    }
+
+    fun addKif(){
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.type = "*/*"
+        resultLauncher.launch(intent)
+    }
+
+    var resultLauncher = registerForActivityResult(
+        StartActivityForResult()
+    ) { result: ActivityResult ->
+        if (result.resultCode == RESULT_OK) {
+            val uri: Uri? = result.data?.data
+            val inputStream = uri?.let { contentResolver.openInputStream(it) }
+            if (inputStream != null) {
+                try {
+                    val lines = inputStream.bufferedReader(Charset.forName("SJIS")).use { it.readLines() }
+                    val parser = Parser()
+                    val gameInfo: GameInfo = parser.parse(lines)
+                }catch(e:Exception){
+                    // 読み込みエラー
+                    AlertDialog.Builder(this)
+                        .setTitle("エラー")
+                        .setMessage("このファイルは読み込むことができませんでした")
+                        .setPositiveButton("OK", { dialog, which ->
+                        })
+                        .show()
+                }
+            }
+        }
     }
 }
