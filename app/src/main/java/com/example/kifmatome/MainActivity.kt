@@ -150,6 +150,15 @@ class MainActivity : AppCompatActivity() {
     ) { result: ActivityResult ->
         if (result.resultCode == RESULT_OK) {
             val uri: Uri? = result.data?.data
+
+            // URIへのアクセス権限を永続化する
+            // 再起動すると権限が消えるらしい？
+            val contentResolver = applicationContext.contentResolver
+            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            if (uri != null) {
+                contentResolver.takePersistableUriPermission(uri, takeFlags)
+            }
+
             val inputStream = uri?.let { contentResolver.openInputStream(it) }
             if (inputStream != null) {
                 try {
