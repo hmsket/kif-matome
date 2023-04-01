@@ -199,6 +199,9 @@ class MainActivity : AppCompatActivity() {
                             values.put("file_gote", fileGote)
                             values.put("file_order", fileOrder)
                             db.insert("file", null, values)
+
+                            // 棋譜を追加後，ListViewを更新する
+                            viewPager.adapter = pagerAdapter
                         })
                         .setNegativeButton("キャンセル", null)
                         .show()
