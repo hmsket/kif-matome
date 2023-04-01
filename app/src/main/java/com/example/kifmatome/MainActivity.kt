@@ -121,13 +121,22 @@ class MainActivity : AppCompatActivity() {
         tabList = readTabFromDB()
 
         // タブの移動をスワイプで行えるようにする
-        pagerAdapter = PageAdapter(this, tabList)
+        pagerAdapter = PageAdapter(this, db, tabList)
         viewPager.adapter = pagerAdapter
 
         // タブを作成し，表示する
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = tabList[position]
         }.attach()
+    }
+
+    fun getMaxFileOrder(tab_id: Int): Int{
+        val sql = "SELECT MAX(file_order) FROM file WHERE tab_id = " + tab_id
+        val cursor = db.rawQuery(sql, null)
+        cursor.moveToFirst()
+        val maxFileOrder = cursor.getInt(0)
+        cursor.close()
+        return maxFileOrder
     }
 
     fun addKif(){
@@ -147,6 +156,52 @@ class MainActivity : AppCompatActivity() {
                     val lines = inputStream.bufferedReader(Charset.forName("SJIS")).use { it.readLines() }
                     val parser = Parser()
                     val gameInfo: GameInfo = parser.parse(lines)
+
+                    val view = this.layoutInflater.inflate(R.layout.add_kif_form, null)
+
+                    view.findViewById<EditText>(R.id.add_kif_tournament).setText(gameInfo.gameName)
+                    view.findViewById<EditText>(R.id.add_kif_date).setText(gameInfo.date)
+                    view.findViewById<EditText>(R.id.add_kif_sente).setText(gameInfo.senteName)
+                    view.findViewById<EditText>(R.id.add_kif_gote).setText(gameInfo.goteName)
+
+                    AlertDialog.Builder(this)
+                        .setTitle("棋譜を追加")
+                        .setView(view)
+                        .setPositiveButton("OK", { dialog, which ->
+                            val pos = tabLayout.selectedTabPosition
+                            // tab_orderを昇順に並べて，pos番目の_idを取得
+                            val sql = "SELECT _id FROM tab ORDER BY tab_order ASC LIMIT 1 OFFSET " + pos
+                            val cursor = db.rawQuery(sql, null)
+                            cursor.moveToFirst()
+                            val tabId = cursor.getInt(0)
+                            cursor.close()
+
+                            val fileId = getMaxFileOrder(tabId)+1
+                            val filePic = ""
+                            val fileTitle = view.findViewById<EditText>(R.id.add_kif_title).text.toString()
+                            val filePath = uri.toString()
+                            val fileTournament = view.findViewById<EditText>(R.id.add_kif_tournament).text.toString()
+                            val fileDate = view.findViewById<EditText>(R.id.add_kif_date).text.toString()
+                            val fileSente = view.findViewById<EditText>(R.id.add_kif_sente).text.toString()
+                            val fileGote = view.findViewById<EditText>(R.id.add_kif_gote).text.toString()
+                            val fileOrder = fileId
+
+                            // DBに登録
+                            val values = ContentValues()
+                            values.put("tab_id", tabId)
+                            values.put("file_id", fileId)
+                            values.put("file_pic", filePic)
+                            values.put("file_title", fileTitle)
+                            values.put("file_path", filePath)
+                            values.put("file_tournament", fileTournament)
+                            values.put("file_date", fileDate)
+                            values.put("file_sente", fileSente)
+                            values.put("file_gote", fileGote)
+                            values.put("file_order", fileOrder)
+                            db.insert("file", null, values)
+                        })
+                        .setNegativeButton("キャンセル", null)
+                        .show()
                 }catch(e:Exception){
                     // 読み込みエラー
                     AlertDialog.Builder(this)
