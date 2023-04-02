@@ -8,8 +8,6 @@ class Parser() {
         var move = Move(-333, -333, -333, -333)
         move.sashite = "開始局面"
 
-//        info.moveList.add(move)
-
         var comment = ""
 
         var j = -1
