@@ -26,7 +26,7 @@ class Parser() {
                 move.comment = comment
                 info.moveList.add(move)
                 move = Move(-333, -333, -333, -333)
-                generateSashiteInfo(move, line)
+                generateSashiteInfo(info, move, line)
                 comment = ""
             } else {
                 // キーワード
@@ -61,7 +61,7 @@ class Parser() {
         return tmp
     }
 
-    fun generateSashiteInfo(move: Move, s: String): Move {
+    fun generateSashiteInfo(info: GameInfo, move: Move, s: String): Move {
         var i = 0
         var str = s
         str = str.trimStart()
@@ -93,8 +93,13 @@ class Parser() {
         if (isSashite(sashite)) {
             val nextPosStr = sashite.substring(0, 2)
             var nextPos = generateNextPos(nextPosStr)
-            nextPos = posToIndex(nextPos)
-            move.nextPos = nextPos
+            if (nextPos == -1) {
+                nextPos = info.moveList.get(info.moveList.size-1).nextPos
+                move.nextPos = nextPos
+            } else {
+                nextPos = posToIndex(nextPos)
+                move.nextPos = nextPos
+            }
 
             var pieceStr = sashite.substring(2)
             pieceStr = pieceStr.trimEnd()
@@ -224,6 +229,9 @@ class Parser() {
     }
 
     fun posToIndex(i: Int): Int {
+        if (i == -1) {
+            return -1
+        }
         val pos = (9 - i % 10) * 10 + (10 - i / 10)
         val tmp = ((8 - (pos / 10)) * 8 + (pos % 10 - 1) + (8 - (pos / 10)))
         return tmp
