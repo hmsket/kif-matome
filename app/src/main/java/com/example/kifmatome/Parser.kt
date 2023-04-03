@@ -13,6 +13,11 @@ class Parser() {
         var j = -1
         for (line in lines) {
             j++
+
+            if(line.length == 0){
+                continue
+            }
+
             val lineTrim = line.trimStart()
             val str = lineTrim.substring(0, 1)
             if (str == "#") {
