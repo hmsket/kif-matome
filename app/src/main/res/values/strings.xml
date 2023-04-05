@@ -20,4 +20,9 @@
     <string name="add_kif_sente_hint">先手対局者名を入力してください</string>
     <string name="add_kif_gote">後手</string>
     <string name="add_kif_gote_hint">後手対局者名を入力してください</string>
+    <string name="player_setting">設定</string>
+    <string name="player_start">◀◀</string>
+    <string name="player_prev">◀</string>
+    <string name="player_next">▶</string>
+    <string name="player_last">▶▶</string>
 </resources>
