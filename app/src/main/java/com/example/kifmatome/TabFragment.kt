@@ -1,12 +1,12 @@
 package com.example.kifmatome
 
+import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 
@@ -52,12 +52,20 @@ class TabFragment(val fa: FragmentActivity, val db: SQLiteDatabase, val position
         listview.adapter = adapter
 
         listview.setOnItemClickListener { adapterView, view, i, l ->
-            val sql = "SELECT file_id FROM file WHERE tab_id = " + tabId + " ORDER BY file_order ASC LIMIT 1 OFFSET " + l
-            val cursor = db.rawQuery(sql, null)
+            var sql = "SELECT file_id FROM file WHERE tab_id = " + tabId + " ORDER BY file_order ASC LIMIT 1 OFFSET " + l
+            var cursor = db.rawQuery(sql, null)
             cursor.moveToFirst()
             val fileId = cursor.getInt(0)
+            sql = "SELECT file_path FROM file WHERE tab_id = " + tabId + " AND file_id = " + fileId
+            cursor = db.rawQuery(sql, null)
+            cursor.moveToFirst()
+            val filePath = cursor.getString(0)
             cursor.close()
-            Toast.makeText(fa, "tab_id = "+ tabId + ", file_id = " + fileId, Toast.LENGTH_SHORT).show()
+
+            // 棋譜再生画面への遷移
+            val intent = Intent(fa, PlayerActivity::class.java)
+            intent.putExtra("filePath", filePath);
+            startActivity(intent)
         }
 
         return root
