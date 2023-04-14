@@ -7,7 +7,9 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
+import android.widget.ArrayAdapter
 import android.widget.EditText
+import android.widget.ListView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
@@ -49,7 +51,7 @@ class MainActivity : AppCompatActivity() {
          when (item.itemId) {
              R.id.add_tab -> addTab()
              R.id.add_kif -> addKif()
-        //     R.id.delete_tab ->
+             R.id.delete_tab -> deleteTab()
         //     R.id.delete_tab ->
         //     R.id.sort_tab ->
         //   R.id.sort_tab ->
@@ -225,5 +227,58 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    fun deleteTabFromDB(pos: Int){
+        var sql = "SELECT _id FROM tab ORDER BY tab_order ASC LIMIT 1 OFFSET " + pos
+        val cursor = db.rawQuery(sql, null)
+        cursor.moveToFirst()
+        val deleteTabId = cursor.getInt(0)
+        cursor.close()
+        sql = "DELETE FROM tab WHERE _id = " + deleteTabId
+        db.execSQL(sql)
+    }
+
+    fun deleteFileIfTabIdFromDB(pos: Int){
+        var sql = "SELECT _id FROM tab ORDER BY tab_order ASC LIMIT 1 OFFSET " + pos
+        val cursor = db.rawQuery(sql, null)
+        if(cursor.count == 0){
+            return
+        }
+        cursor.moveToFirst()
+        val deleteTabId = cursor.getInt(0)
+        cursor.close()
+        sql = "DELETE FROM file WHERE tab_id = " + deleteTabId
+        db.execSQL(sql)
+    }
+
+    fun deleteTab(){
+        val deleteTabList = readTabFromDB()
+        val deleteAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, deleteTabList)
+        val deleteListView = ListView(this)
+        deleteListView.adapter = deleteAdapter
+
+        deleteListView.setOnItemClickListener { adapterView, view, i, l ->
+            val deleteTabName = deleteAdapter.getItem(i)
+            AlertDialog.Builder(this)
+                .setTitle("「" + deleteTabName + "」を削除")
+                .setMessage("注意：削除したら元に戻せません")
+                .setPositiveButton("削除する", { dialog, which ->
+                    deleteTabFromDB(i)
+                    deleteFileIfTabIdFromDB(i)
+                    deleteAdapter.remove(deleteTabName)
+                    deleteAdapter.notifyDataSetChanged()
+                })
+                .setNegativeButton("キャンセル", null)
+                .show()
+        }
+
+        AlertDialog.Builder(this)
+            .setView(deleteListView)
+            .setCancelable(false)
+            .setPositiveButton("OK", { dialog, which ->
+                setTab()
+            })
+            .show()
     }
 }
