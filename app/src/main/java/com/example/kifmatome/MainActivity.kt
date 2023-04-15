@@ -229,26 +229,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun deleteTabFromDB(pos: Int){
-        var sql = "SELECT _id FROM tab ORDER BY tab_order ASC LIMIT 1 OFFSET " + pos
+    fun getTabIdFromDB(pos: Int): Int{
+        val sql = "SELECT _id FROM tab ORDER BY tab_order ASC LIMIT 1 OFFSET " + pos
         val cursor = db.rawQuery(sql, null)
         cursor.moveToFirst()
-        val deleteTabId = cursor.getInt(0)
+        val tabId = cursor.getInt(0)
         cursor.close()
-        sql = "DELETE FROM tab WHERE _id = " + deleteTabId
+        return tabId
+    }
+
+    fun deleteTabFromDB(deleteTabId: Int){
+        val sql = "DELETE FROM tab WHERE _id = " + deleteTabId
         db.execSQL(sql)
     }
 
-    fun deleteFileIfTabIdFromDB(pos: Int){
-        var sql = "SELECT _id FROM tab ORDER BY tab_order ASC LIMIT 1 OFFSET " + pos
-        val cursor = db.rawQuery(sql, null)
-        if(cursor.count == 0){
-            return
-        }
-        cursor.moveToFirst()
-        val deleteTabId = cursor.getInt(0)
-        cursor.close()
-        sql = "DELETE FROM file WHERE tab_id = " + deleteTabId
+    fun deleteFileIfTabIdFromDB(deleteTabId: Int){
+        val sql = "DELETE FROM file WHERE tab_id = " + deleteTabId
         db.execSQL(sql)
     }
 
@@ -264,8 +260,9 @@ class MainActivity : AppCompatActivity() {
                 .setTitle("「" + deleteTabName + "」を削除")
                 .setMessage("注意：削除したら元に戻せません")
                 .setPositiveButton("削除する", { dialog, which ->
-                    deleteTabFromDB(i)
-                    deleteFileIfTabIdFromDB(i)
+                    val deleteTabId = getTabIdFromDB(i)
+                    deleteTabFromDB(deleteTabId)
+                    deleteFileIfTabIdFromDB(deleteTabId)
                     deleteAdapter.remove(deleteTabName)
                     deleteAdapter.notifyDataSetChanged()
                 })
