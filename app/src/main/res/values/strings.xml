@@ -20,6 +20,8 @@
     <string name="add_kif_sente_hint">先手対局者名を入力してください</string>
     <string name="add_kif_gote">後手</string>
     <string name="add_kif_gote_hint">後手対局者名を入力してください</string>
+    <string name="delete_kif_tab">タブを選ぶ</string>
+    <string name="delete_kif_kif">棋譜を選ぶ</string>
     <string name="player_setting">設定</string>
     <string name="player_start">◀◀</string>
     <string name="player_prev">◀</string>

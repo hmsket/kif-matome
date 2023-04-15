@@ -7,9 +7,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.ListView
+import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
@@ -52,7 +50,7 @@ class MainActivity : AppCompatActivity() {
              R.id.add_tab -> addTab()
              R.id.add_kif -> addKif()
              R.id.delete_tab -> deleteTab()
-        //     R.id.delete_tab ->
+             R.id.delete_kif -> deleteKif()
         //     R.id.sort_tab ->
         //   R.id.sort_tab ->
          }
@@ -275,6 +273,95 @@ class MainActivity : AppCompatActivity() {
             .setCancelable(false)
             .setPositiveButton("OK", { dialog, which ->
                 setTab()
+            })
+            .show()
+    }
+
+    fun getKifIdFromDB(tabId: Int, pos: Int): Int{
+        val sql = "SELECT file_id FROM file WHERE tab_id = " + tabId + " ORDER BY file_order ASC LIMIT 1 OFFSET " + pos
+        val cursor = db.rawQuery(sql, null)
+        cursor.moveToFirst()
+        val kifId = cursor.getInt(0)
+        cursor.close()
+        return kifId
+    }
+
+    fun updateKifListview(listview: ListView, tabId: Int){
+        val dataList = arrayListOf<Kif>()
+        val sql = "SELECT * FROM file WHERE tab_id = " + tabId + " ORDER BY file_order ASC"
+        val cursor = db.rawQuery(sql, null)
+        cursor.moveToFirst()
+        val tilteIdx = cursor.getColumnIndex("file_title")
+        val tournamentIdx = cursor.getColumnIndex("file_tournament")
+        val dateIdx = cursor.getColumnIndex("file_date")
+        val senteIdx = cursor.getColumnIndex("file_sente")
+        val goteIdx = cursor.getColumnIndex("file_gote")
+        for (i in 0 until cursor.count){
+            dataList.add(Kif().apply {
+                title = cursor.getString(tilteIdx)
+                tournament = cursor.getString(tournamentIdx)
+                date = cursor.getString(dateIdx)
+                sente = cursor.getString(senteIdx)
+                gote = cursor.getString(goteIdx)
+            })
+            cursor.moveToNext()
+        }
+        cursor.close()
+
+        val listviewAdapter = MyAdapter(this, dataList)
+        listview.adapter = listviewAdapter
+    }
+
+    fun deleteKifFromDB(deleteTabId: Int, deleteKifId: Int){
+        val sql = "DELETE FROM file WHERE tab_id = " + deleteTabId + " AND file_id = " + deleteKifId
+        db.execSQL(sql)
+    }
+
+    fun deleteKif(){
+        val deleteKifDialogView = this.layoutInflater.inflate(R.layout.delete_kif_form, null)
+
+        val tabList = readTabFromDB()
+
+        val spinnerView = deleteKifDialogView.findViewById<Spinner>(R.id.delete_kif_spinner)
+        val spinnerAdapter = ArrayAdapter(applicationContext, android.R.layout.simple_spinner_item, tabList)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerView.adapter = spinnerAdapter
+
+        val deleteListView = deleteKifDialogView.findViewById<ListView>(R.id.delete_kif_listview)
+
+        var tabId = getTabIdFromDB(0)
+        updateKifListview(deleteListView, tabId)
+
+        deleteListView.setOnItemClickListener { adapterView, view, i, l ->
+            AlertDialog.Builder(this)
+                .setMessage("注意：削除したら元に戻せません")
+                .setPositiveButton("削除する", { dialog, which ->
+                    val deleteTabId = tabId
+                    val deleteKifId = getKifIdFromDB(deleteTabId, i)
+                    deleteKifFromDB(deleteTabId, deleteKifId)
+                    updateKifListview(deleteListView, tabId)
+                })
+                .setNegativeButton("キャンセル", null)
+                .show()
+        }
+
+        spinnerView.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, pos: Int, id: Long) {
+                tabId = getTabIdFromDB(pos)
+                updateKifListview(deleteListView, tabId)
+            }
+            override fun onNothingSelected(parent: AdapterView<out Adapter>?) {
+
+            }
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("棋譜を削除")
+            .setView(deleteKifDialogView)
+            .setCancelable(false)
+            .setPositiveButton("OK", { dialog, which ->
+                // 棋譜ListViewを更新する
+                viewPager.adapter = pagerAdapter
             })
             .show()
     }
