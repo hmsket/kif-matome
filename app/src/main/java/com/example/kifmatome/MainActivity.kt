@@ -501,7 +501,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         AlertDialog.Builder(this)
-            .setTitle("棋譜を削除")
+            .setTitle("棋譜を編集")
             .setView(editKifDialogView)
             .setCancelable(false)
             .setPositiveButton("OK", { dialog, which ->
@@ -555,7 +555,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
 
         AlertDialog.Builder(this)
-            .setTitle("タブの並び替え")
+            .setTitle("タブを並び替え")
             .setView(view)
             .setPositiveButton("OK") { dialog, which ->
                 for (i in 0 until adapter.itemCount) {
