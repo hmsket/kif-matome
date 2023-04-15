@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
              R.id.edit_tab -> editTab()
              R.id.edit_kif -> editKif()
              R.id.sort_tab -> sortTab()
-        //   R.id.sort_tab ->
+             R.id.sort_kif -> sortKif()
          }
         return true
     }
@@ -566,6 +566,115 @@ class MainActivity : AppCompatActivity() {
                     db.execSQL(sql)
                 }
                 setTab()
+            }
+            .show()
+    }
+
+    fun getKifDataListFromDB(tabId: Int): MutableList<Kif>{
+        val dataList = arrayListOf<Kif>()
+        val sql = "SELECT * FROM file WHERE tab_id = " + tabId + " ORDER BY file_order ASC"
+        val cursor = db.rawQuery(sql, null)
+        cursor.moveToFirst()
+        val tilteIdx = cursor.getColumnIndex("file_title")
+        val tournamentIdx = cursor.getColumnIndex("file_tournament")
+        val dateIdx = cursor.getColumnIndex("file_date")
+        val senteIdx = cursor.getColumnIndex("file_sente")
+        val goteIdx = cursor.getColumnIndex("file_gote")
+        for (i in 0 until cursor.count){
+            dataList.add(Kif().apply {
+                title = cursor.getString(tilteIdx)
+                tournament = cursor.getString(tournamentIdx)
+                date = cursor.getString(dateIdx)
+                sente = cursor.getString(senteIdx)
+                gote = cursor.getString(goteIdx)
+            })
+            cursor.moveToNext()
+        }
+        cursor.close()
+
+        return dataList
+    }
+
+    fun updateKifRecyclerview(recyclerView: RecyclerView, tabId: Int){
+        val dataList = getKifDataListFromDB(tabId)
+        val listviewAdapter = SortKifListViewAdapter(dataList)
+        recyclerView.adapter = listviewAdapter
+    }
+
+
+    fun sortKif(){
+        val view = this.layoutInflater.inflate(R.layout.sort_kif_form, null)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.sort_recyclerview)
+        recyclerView.setHasFixedSize(true)
+        val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = layoutManager
+
+        val itemDecoration: RecyclerView.ItemDecoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+        recyclerView.addItemDecoration(itemDecoration)
+
+        var tabId = getTabIdFromDB(0)
+        val dataList = getKifDataListFromDB(tabId)
+        recyclerView.adapter = SortKifListViewAdapter(dataList)
+
+        val adapter = recyclerView.adapter as SortKifListViewAdapter
+
+        val mIth = ItemTouchHelper(
+            object : ItemTouchHelper.SimpleCallback(
+                ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+                ItemTouchHelper.LEFT
+            ) {
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean {
+                    val fromPos = viewHolder.adapterPosition
+                    val toPos = target.adapterPosition
+                    recyclerView.adapter?.notifyItemMoved(fromPos, toPos)
+                    return true
+                }
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    dataList.removeAt(viewHolder.adapterPosition)
+                    adapter.notifyItemRemoved(viewHolder.adapterPosition)
+                }
+            })
+
+        mIth.attachToRecyclerView(recyclerView)
+
+        val tabList = readTabFromDB()
+        val spinnerView = view.findViewById<Spinner>(R.id.sort_kif_spinner)
+        val spinnerAdapter = ArrayAdapter(applicationContext, android.R.layout.simple_spinner_item, tabList)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerView.adapter = spinnerAdapter
+
+        tabId = getTabIdFromDB(0)
+        updateKifRecyclerview(recyclerView, tabId)
+
+        spinnerView.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, pos: Int, id: Long) {
+                tabId = getTabIdFromDB(pos)
+                updateKifRecyclerview(recyclerView, tabId)
+            }
+            override fun onNothingSelected(parent: AdapterView<out Adapter>?) {
+
+            }
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("棋譜を並び替え")
+            .setView(view)
+            .setPositiveButton("OK") { dialog, which ->
+                val adapter = recyclerView.adapter
+                if (adapter != null) {
+                    for (i in 0 until adapter.itemCount) {
+                        val view = recyclerView.layoutManager!!.findViewByPosition(i)
+                        val textView = view!!.findViewById<TextView>(R.id.kif_title)
+                        val kifTitle = textView.text.toString()
+                        val sql = "UPDATE file SET file_order = " + i + " WHERE tab_id = " + tabId + " AND file_title = '" + kifTitle + "'"
+                        db.execSQL(sql)
+                    }
+                }
+                viewPager.adapter = pagerAdapter
             }
             .show()
     }
