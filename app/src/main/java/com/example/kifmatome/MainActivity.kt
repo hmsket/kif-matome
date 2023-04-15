@@ -310,7 +310,7 @@ class MainActivity : AppCompatActivity() {
         }
         cursor.close()
 
-        val listviewAdapter = MyAdapter(this, dataList)
+        val listviewAdapter = MyAdapter(this, dataList, tabId, db)
         listview.adapter = listviewAdapter
     }
 

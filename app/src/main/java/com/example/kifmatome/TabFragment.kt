@@ -1,6 +1,5 @@
 package com.example.kifmatome
 
-import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -48,25 +47,8 @@ class TabFragment(val fa: FragmentActivity, val db: SQLiteDatabase, val position
         }
         cursor.close()
 
-        val adapter = MyAdapter(fa, dataList)
+        val adapter = MyAdapter(fa, dataList, tabId, db)
         listview.adapter = adapter
-
-        listview.setOnItemClickListener { adapterView, view, i, l ->
-            var sql = "SELECT file_id FROM file WHERE tab_id = " + tabId + " ORDER BY file_order ASC LIMIT 1 OFFSET " + l
-            var cursor = db.rawQuery(sql, null)
-            cursor.moveToFirst()
-            val fileId = cursor.getInt(0)
-            sql = "SELECT file_path FROM file WHERE tab_id = " + tabId + " AND file_id = " + fileId
-            cursor = db.rawQuery(sql, null)
-            cursor.moveToFirst()
-            val filePath = cursor.getString(0)
-            cursor.close()
-
-            // 棋譜再生画面への遷移
-            val intent = Intent(fa, PlayerActivity::class.java)
-            intent.putExtra("filePath", filePath);
-            startActivity(intent)
-        }
 
         return root
     }
