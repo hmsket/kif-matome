@@ -4,13 +4,17 @@ import android.content.ContentValues
 import android.content.Intent
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
 import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -53,7 +57,7 @@ class MainActivity : AppCompatActivity() {
              R.id.delete_kif -> deleteKif()
              R.id.edit_tab -> editTab()
              R.id.edit_kif -> editKif()
-        //     R.id.sort_tab ->
+             R.id.sort_tab -> sortTab()
         //   R.id.sort_tab ->
          }
         return true
@@ -504,6 +508,65 @@ class MainActivity : AppCompatActivity() {
                 // 棋譜ListViewを更新する
                 viewPager.adapter = pagerAdapter
             })
+            .show()
+    }
+
+    fun sortTab(){
+        val view = this.layoutInflater.inflate(R.layout.sort_recyclerview, null)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerview)
+
+        recyclerView.setHasFixedSize(true)
+        val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this)
+
+        recyclerView.layoutManager = layoutManager
+
+        val sortTabList = readTabFromDB()
+
+        recyclerView.adapter = SortTabListViewAdapter(sortTabList)
+
+        val itemDecoration: RecyclerView.ItemDecoration = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+        recyclerView.addItemDecoration(itemDecoration)
+
+        val adapter = recyclerView.adapter as SortTabListViewAdapter
+
+        val mIth = ItemTouchHelper(
+            object : ItemTouchHelper.SimpleCallback(
+                ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+                ItemTouchHelper.LEFT
+            ) {
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean {
+                    val fromPos = viewHolder.adapterPosition
+                    val toPos = target.adapterPosition
+                    adapter.notifyItemMoved(fromPos, toPos)
+                    return true
+                }
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    sortTabList.removeAt(viewHolder.adapterPosition)
+                    adapter.notifyItemRemoved(viewHolder.adapterPosition)
+                }
+            })
+
+        mIth.attachToRecyclerView(recyclerView)
+
+        recyclerView.adapter = adapter
+
+        AlertDialog.Builder(this)
+            .setTitle("タブの並び替え")
+            .setView(view)
+            .setPositiveButton("OK") { dialog, which ->
+                for (i in 0 until adapter.itemCount) {
+                    val view = recyclerView.layoutManager!!.findViewByPosition(i)
+                    val textView = view!!.findViewById<TextView>(R.id.sort_tab_name_view)
+                    val tabName = textView.text.toString()
+                    val sql = "UPDATE tab SET tab_order = " + i + " WHERE tab_name = '" + tabName + "'"
+                    db.execSQL(sql)
+                }
+                setTab()
+            }
             .show()
     }
 }
