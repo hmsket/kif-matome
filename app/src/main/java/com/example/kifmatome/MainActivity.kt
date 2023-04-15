@@ -51,6 +51,8 @@ class MainActivity : AppCompatActivity() {
              R.id.add_kif -> addKif()
              R.id.delete_tab -> deleteTab()
              R.id.delete_kif -> deleteKif()
+             R.id.edit_tab -> editTab()
+        //     R.id.edit_kif ->
         //     R.id.sort_tab ->
         //   R.id.sort_tab ->
          }
@@ -362,6 +364,45 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton("OK", { dialog, which ->
                 // 棋譜ListViewを更新する
                 viewPager.adapter = pagerAdapter
+            })
+            .show()
+    }
+
+    fun editTabFromDB(tabName: String, editTabId: Int){
+        val sql = "UPDATE tab SET tab_name = '" + tabName + "' WHERE _id = " + editTabId
+        db.execSQL(sql)
+    }
+
+    fun editTab(){
+        var editTabList = readTabFromDB()
+        var editAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, editTabList)
+        val editListView = ListView(this)
+        editListView.adapter = editAdapter
+
+        editListView.setOnItemClickListener { adapterView, view, i, l ->
+            val editTabName = editAdapter.getItem(i)
+            val editText = EditText(this)
+            editText.setText(editTabName)
+            AlertDialog.Builder(this)
+                .setTitle("編集")
+                .setView(editText)
+                .setPositiveButton("OK", { dialog, which ->
+                    val newTabName = editText.text.toString()
+                    val editTabId = getTabIdFromDB(i)
+                    editTabFromDB(newTabName, editTabId)
+                    editTabList = readTabFromDB()
+                    editAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, editTabList)
+                    editListView.adapter = editAdapter
+                })
+                .setNegativeButton("キャンセル", null)
+                .show()
+        }
+
+        AlertDialog.Builder(this)
+            .setView(editListView)
+            .setCancelable(false)
+            .setPositiveButton("OK", { dialog, which ->
+                setTab()
             })
             .show()
     }

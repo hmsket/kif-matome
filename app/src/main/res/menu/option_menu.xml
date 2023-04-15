@@ -5,7 +5,7 @@
     <item
         android:icon="@drawable/baseline_add_24"
         android:title="@string/add"
-        app:showAsAction="ifRoom" >
+        app:showAsAction="always" >
         <menu>
             <item
                 android:id="@+id/add_tab"
@@ -19,7 +19,7 @@
     <item
         android:icon="@drawable/baseline_delete_24"
         android:title="@string/delete"
-        app:showAsAction="ifRoom" >
+        app:showAsAction="always" >
         <menu>
             <item
                 android:id="@+id/delete_tab"
@@ -31,9 +31,23 @@
     </item>
 
     <item
+        android:icon="@drawable/baseline_edit_24"
+        android:title="@string/edit"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/edit_tab"
+                android:title="@string/edit_tab" />
+            <item
+                android:id="@+id/edit_kif"
+                android:title="@string/edit_kif" />
+        </menu>
+    </item>
+
+    <item
         android:icon="@drawable/baseline_sort_24"
         android:title="@string/sort"
-        app:showAsAction="ifRoom" >
+        app:showAsAction="always" >
         <menu>
             <item
                 android:id="@+id/sort_tab"

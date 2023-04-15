@@ -6,6 +6,9 @@
     <string name="delete">削除</string>
     <string name="delete_tab">タブを削除</string>
     <string name="delete_kif">棋譜を削除</string>
+    <string name="edit">編集</string>
+    <string name="edit_tab">タブ名を編集</string>
+    <string name="edit_kif">棋譜情報を編集</string>
     <string name="sort">並び替え</string>
     <string name="sort_tab">タブを並び替え</string>
     <string name="sort_kif">棋譜を並び替え</string>
