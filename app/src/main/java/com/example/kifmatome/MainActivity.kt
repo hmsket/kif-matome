@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
              R.id.delete_tab -> deleteTab()
              R.id.delete_kif -> deleteKif()
              R.id.edit_tab -> editTab()
-        //     R.id.edit_kif ->
+             R.id.edit_kif -> editKif()
         //     R.id.sort_tab ->
         //   R.id.sort_tab ->
          }
@@ -403,6 +403,106 @@ class MainActivity : AppCompatActivity() {
             .setCancelable(false)
             .setPositiveButton("OK", { dialog, which ->
                 setTab()
+            })
+            .show()
+    }
+
+    fun getKifInfoFromDB(tabId: Int, kifId: Int): Kif{
+        val kifInfo = Kif()
+
+        val sql = "SELECT * FROM file WHERE tab_id = " + tabId + " AND file_id = " + kifId
+        val cursor = db.rawQuery(sql, null)
+        cursor.moveToFirst()
+
+        val tilteIdx = cursor.getColumnIndex("file_title")
+        val tournamentIdx = cursor.getColumnIndex("file_tournament")
+        val dateIdx = cursor.getColumnIndex("file_date")
+        val senteIdx = cursor.getColumnIndex("file_sente")
+        val goteIdx = cursor.getColumnIndex("file_gote")
+
+        kifInfo.title = cursor.getString(tilteIdx)
+        kifInfo.tournament = cursor.getString(tournamentIdx)
+        kifInfo.date = cursor.getString(dateIdx)
+        kifInfo.sente = cursor.getString(senteIdx)
+        kifInfo.gote = cursor.getString(goteIdx)
+
+        cursor.close()
+
+        return kifInfo
+    }
+
+    fun editKif(){
+        // R.layout.delete_kif_formを再利用する
+        val editKifDialogView = this.layoutInflater.inflate(R.layout.delete_kif_form, null)
+
+        val tabList = readTabFromDB()
+
+        val spinnerView = editKifDialogView.findViewById<Spinner>(R.id.delete_kif_spinner)
+        val spinnerAdapter = ArrayAdapter(applicationContext, android.R.layout.simple_spinner_item, tabList)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerView.adapter = spinnerAdapter
+
+        val editListView = editKifDialogView.findViewById<ListView>(R.id.delete_kif_listview)
+
+        var tabId = getTabIdFromDB(0)
+        updateKifListview(editListView, tabId)
+
+        editListView.setOnItemClickListener { adapterView, _, i, l ->
+            // DBから棋譜情報を取得
+            val editTabId = tabId
+            val editKifId = getKifIdFromDB(editTabId, i)
+            val kifInfo = getKifInfoFromDB(editTabId, editKifId)
+
+            // R.layout.add_kif_formを再利用する
+            val view = this.layoutInflater.inflate(R.layout.add_kif_form, null)
+
+            view.findViewById<EditText>(R.id.add_kif_title).setText(kifInfo.title)
+            view.findViewById<EditText>(R.id.add_kif_tournament).setText(kifInfo.tournament)
+            view.findViewById<EditText>(R.id.add_kif_date).setText(kifInfo.date)
+            view.findViewById<EditText>(R.id.add_kif_sente).setText(kifInfo.sente)
+            view.findViewById<EditText>(R.id.add_kif_gote).setText(kifInfo.gote)
+
+            AlertDialog.Builder(this)
+                .setTitle("棋譜情報を編集")
+                .setView(view)
+                .setPositiveButton("OK", { dialog, which ->
+                    val fileTitle = view.findViewById<EditText>(R.id.add_kif_title).text.toString()
+                    val fileTournament = view.findViewById<EditText>(R.id.add_kif_tournament).text.toString()
+                    val fileDate = view.findViewById<EditText>(R.id.add_kif_date).text.toString()
+                    val fileSente = view.findViewById<EditText>(R.id.add_kif_sente).text.toString()
+                    val fileGote = view.findViewById<EditText>(R.id.add_kif_gote).text.toString()
+
+                    val values = ContentValues()
+                    values.put("file_title", fileTitle)
+                    values.put("file_tournament", fileTournament)
+                    values.put("file_date", fileDate)
+                    values.put("file_sente", fileSente)
+                    values.put("file_gote", fileGote)
+                    db.update("file", values, "tab_id = " + editTabId + " AND file_id = " + editKifId, null)
+
+                    updateKifListview(editListView, tabId)
+                })
+                .setNegativeButton("キャンセル", null)
+                .show()
+        }
+
+        spinnerView.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, pos: Int, id: Long) {
+                tabId = getTabIdFromDB(pos)
+                updateKifListview(editListView, tabId)
+            }
+            override fun onNothingSelected(parent: AdapterView<out Adapter>?) {
+
+            }
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("棋譜を削除")
+            .setView(editKifDialogView)
+            .setCancelable(false)
+            .setPositiveButton("OK", { dialog, which ->
+                // 棋譜ListViewを更新する
+                viewPager.adapter = pagerAdapter
             })
             .show()
     }
